@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Notes — задача</title>
+<style>
+  :root {
+    --bg: #f4f5f9;
+    --card-text: #1f2430;
+    --card-secondary: #4a5163;
+    --text: #1f2430;
+    --secondary: #6b7180;
+    --primary: #4c6ef5;
+    --primary-text: #ffffff;
+    --line: rgba(31, 36, 48, 0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171f;
+      --text: #f1f2f6;
+      --secondary: #a3a8b5;
+      --primary: #5c7cfa;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 520px; margin: 0 auto; padding: 24px 16px 40px; }
+  .card { border-radius: 24px; padding: 20px; color: var(--card-text); }
+  .head { display: flex; gap: 14px; align-items: center; }
+  .emoji { font-size: 40px; line-height: 1; }
+  h1 { margin: 0; font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+  .description { margin: 14px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  dl { margin: 18px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
+  dt { color: var(--card-secondary); }
+  dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 8px; }
+  h2 { margin: 18px 0 8px; font-size: 15px; color: var(--card-secondary); }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { padding: 4px 0; overflow-wrap: anywhere; }
+  li::before { content: "\2610"; margin-right: 8px; }
+  .open {
+    display: block; margin-top: 20px; padding: 14px; border-radius: 999px;
+    background: var(--primary); color: var(--primary-text);
+    text-align: center; font-weight: 700; text-decoration: none;
+  }
+  .hint { margin: 12px 0 0; text-align: center; color: var(--secondary); font-size: 14px; }
+  .error { text-align: center; color: var(--secondary); padding-top: 40px; }
+</style>
+</head>
+<body>
+<main id="root"></main>
+<script>
+(function () {
+  var COLORS = {
+    white: "#F3F4F8", pink: "#F9D5EC", peach: "#FDE2C8", yellow: "#FFF1A8", lime: "#DDF5C2",
+    blue: "#D6E6FB", mint: "#CDEFE6", lavender: "#E6DCFB", rose: "#FAD3D6", apricot: "#FFDDBF",
+    sand: "#F3E7C4", sage: "#D5EBD0", sky: "#CFEBFA", aqua: "#C9F1F1", lilac: "#F1DAF7"
+  };
+  var isRu = (navigator.language || "en").toLowerCase().indexOf("ru") === 0;
+  var T = isRu ? {
+    title: "Notes — задача", date: "Дата", start: "Начало", repeat: "Повтор", end: "Окончание", time: "Время",
+    tag: "Группа", subtasks: "Подзадачи", anyTime: "В любое время", open: "Открыть в Notes",
+    hint: "Если приложение Notes не установлено, задачу можно прочитать на этой странице.",
+    error: "Не удалось прочитать задачу из ссылки.",
+    daily: "Каждый день", everyDays: "Каждые %n дн.", weekly: "Каждую неделю", everyWeeks: "Каждые %n нед.",
+    monthly: "Каждый месяц", everyMonths: "Каждые %n мес.", monthDays: "числа"
+  } : {
+    title: "Notes — task", date: "Date", start: "Start", repeat: "Repeat", end: "Ends", time: "Time",
+    tag: "Group", subtasks: "Subtasks", anyTime: "Any time", open: "Open in Notes",
+    hint: "If the Notes app isn't installed, you can read the task on this page.",
+    error: "Couldn't read the task from the link.",
+    daily: "Every day", everyDays: "Every %n days", weekly: "Every week", everyWeeks: "Every %n weeks",
+    monthly: "Every month", everyMonths: "Every %n months", monthDays: "days"
+  };
+  var root = document.getElementById("root");
+  document.title = T.title;
+
+  function decode(payload) {
+    var base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  }
+  function el(tag, text, className) {
+    var node = document.createElement(tag);
+    if (text != null) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function color(key) {
+    if (key && key.charAt(0) === "#" && key.length === 9) return "#" + key.slice(3);
+    return COLORS[key] || COLORS.blue;
+  }
+  function formatDate(iso) {
+    var parts = iso.split("-");
+    var date = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    return date.toLocaleDateString(isRu ? "ru-RU" : undefined, { day: "numeric", month: "long", year: "numeric" });
+  }
+  function formatTime(minutes) {
+    var date = new Date(2000, 0, 1, Math.floor(minutes / 60), minutes % 60);
+    return date.toLocaleTimeString(isRu ? "ru-RU" : undefined, { hour: "2-digit", minute: "2-digit" });
+  }
+  function weekdayName(day) {
+    var date = new Date(2024, 0, day);
+    return date.toLocaleDateString(isRu ? "ru-RU" : undefined, { weekday: "short" });
+  }
+  function formatRepeat(rule) {
+    var interval = rule.i || 1;
+    var days = rule.ds || [];
+    if (rule.k === "days") return interval > 1 ? T.everyDays.replace("%n", interval) : T.daily;
+    if (rule.k === "weekly") {
+      var base = interval > 1 ? T.everyWeeks.replace("%n", interval) : T.weekly;
+      return days.length ? base + ": " + days.map(weekdayName).join(", ") : base;
+    }
+    if (rule.k === "monthly") {
+      var month = interval > 1 ? T.everyMonths.replace("%n", interval) : T.monthly;
+      return days.length ? month + ": " + days.join(", ") + " " + T.monthDays : month;
+    }
+    return "";
+  }
+  function addRow(list, label, value) {
+    list.appendChild(el("dt", label));
+    var dd = el("dd");
+    if (typeof value === "string") dd.textContent = value; else dd.appendChild(value);
+    list.appendChild(dd);
+  }
+
+  var payload = location.hash.replace(/^#/, "");
+  var task;
+  try {
+    task = decode(payload);
+  } catch (error) {
+    root.appendChild(el("p", T.error, "error"));
+    return;
+  }
+  var card = el("section", null, "card");
+  card.style.background = color(task.g ? task.g.c : task.c);
+  var head = el("div", null, "head");
+  head.appendChild(el("div", task.g ? task.g.e : task.e, "emoji"));
+  head.appendChild(el("h1", task.t));
+  card.appendChild(head);
+  if (task.d) card.appendChild(el("p", task.d, "description"));
+  var list = el("dl");
+  addRow(list, task.r ? T.start : T.date, formatDate(task.sd));
+  if (task.r) {
+    addRow(list, T.repeat, formatRepeat(task.r));
+    if (task.re) addRow(list, T.end, formatDate(task.re));
+  }
+  var time = T.anyTime;
+  if (task.tm != null) {
+    time = formatTime(task.tm);
+    if (task.du) time += " – " + formatTime((task.tm + task.du) % 1440);
+  }
+  addRow(list, T.time, time);
+  if (task.g) {
+    var tag = el("span", task.g.e + " " + task.g.n, "tag");
+    tag.style.background = "rgba(255, 255, 255, 0.55)";
+    addRow(list, T.tag, tag);
+  }
+  card.appendChild(list);
+  if (task.s && task.s.length) {
+    card.appendChild(el("h2", T.subtasks));
+    var items = el("ul");
+    task.s.forEach(function (subtask) { items.appendChild(el("li", subtask)); });
+    card.appendChild(items);
+  }
+  root.appendChild(card);
+  var open = el("a", T.open, "open");
+  open.href = "intent://task/" + payload + "#Intent;scheme=yankinnotes;end";
+  root.appendChild(open);
+  root.appendChild(el("p", T.hint, "hint"));
+})();
+</script>
+</body>
+</html>
