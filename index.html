@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Notes — задача</title>
+<title>Bunday — задача</title>
 <style>
   :root {
     --bg: #f4f5f9;
@@ -65,16 +65,16 @@
   };
   var isRu = (navigator.language || "en").toLowerCase().indexOf("ru") === 0;
   var T = isRu ? {
-    title: "Notes — задача", date: "Дата", start: "Начало", repeat: "Повтор", end: "Окончание", time: "Время",
-    tag: "Группа", subtasks: "Подзадачи", anyTime: "В любое время", open: "Открыть в Notes",
-    hint: "Если приложение Notes не установлено, задачу можно прочитать на этой странице.",
+    title: "Bunday — задача", date: "Дата", start: "Начало", repeat: "Повтор", end: "Окончание", time: "Время",
+    tag: "Группа", subtasks: "Подзадачи", anyTime: "В любое время", open: "Открыть в Bunday",
+    hint: "Если приложение Bunday не установлено, задачу можно прочитать на этой странице.",
     error: "Не удалось прочитать задачу из ссылки.",
     daily: "Каждый день", everyDays: "Каждые %n дн.", weekly: "Каждую неделю", everyWeeks: "Каждые %n нед.",
     monthly: "Каждый месяц", everyMonths: "Каждые %n мес.", monthDays: "числа"
   } : {
-    title: "Notes — task", date: "Date", start: "Start", repeat: "Repeat", end: "Ends", time: "Time",
-    tag: "Group", subtasks: "Subtasks", anyTime: "Any time", open: "Open in Notes",
-    hint: "If the Notes app isn't installed, you can read the task on this page.",
+    title: "Bunday — task", date: "Date", start: "Start", repeat: "Repeat", end: "Ends", time: "Time",
+    tag: "Group", subtasks: "Subtasks", anyTime: "Any time", open: "Open in Bunday",
+    hint: "If the Bunday app isn't installed, you can read the task on this page.",
     error: "Couldn't read the task from the link.",
     daily: "Every day", everyDays: "Every %n days", weekly: "Every week", everyWeeks: "Every %n weeks",
     monthly: "Every month", everyMonths: "Every %n months", monthDays: "days"
@@ -175,7 +175,7 @@
   }
   root.appendChild(card);
   var open = el("a", T.open, "open");
-  open.href = "intent://task/" + payload + "#Intent;scheme=yankinnotes;end";
+  open.href = "intent://task/" + payload + "#Intent;scheme=bunday;end";
   root.appendChild(open);
   root.appendChild(el("p", T.hint, "hint"));
 })();
