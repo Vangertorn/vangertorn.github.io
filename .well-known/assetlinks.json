@@ -1,0 +1,23 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yankin.bunday",
+      "sha256_cert_fingerprints": [
+        "42:F7:36:DA:7D:62:D0:24:11:9C:B1:F8:F9:F4:16:4B:46:01:63:0B:D0:16:3A:F1:B5:5A:D2:78:E8:0A:21:73",
+        "45:B4:8B:21:53:18:FD:9F:68:47:B7:FB:8D:8B:CA:B1:08:F0:38:D3:6C:BD:D4:2C:27:43:FA:AE:3C:C1:E0:54"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yankin.bunday.debug",
+      "sha256_cert_fingerprints": [
+        "77:51:99:18:27:64:45:D5:17:16:91:21:7A:71:21:30:51:F2:86:F5:F3:D4:F6:6D:3C:EE:60:B1:12:85:21:F2"
+      ]
+    }
+  }
+]
